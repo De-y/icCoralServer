@@ -1,5 +1,5 @@
 import icapi, prisma, os, dotenv
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, redirect
 from prisma.models import User
 
 db = prisma.Prisma()
@@ -16,20 +16,21 @@ def main():
     if request.method == 'GET':
         return render_template('index.html')
 
-@app.route('/api/get_name', methods=['POST'])
+@app.route('/api/verify', methods=['POST'])
 def get_name():
     """
         Logs into Infinite Campus through the icapi and then creates your user account, if any unique detail existed, then it'll return a 400 status code.
     """
+
     student = icapi.User(request.form['username'], request.form['password'], "https://nspcsa.infinitecampus.org/campus/portal/students/coral.jsp")
     name = student.getInformation()['firstName'] + ' ' + student.getInformation()['lastName']
 
     try:
         User.prisma().create(data={'ic_verified': True, 'username': str(request.form['discord_username']), 'name': name})
     except:
-        return 400
+        return redirect('/')
     
-    return 200
+    return render_template('done.html', name=name, username=str(request.form['discord_username']))
 
 @app.route('/api/getinfo', methods=['POST'])
 def get_info():
