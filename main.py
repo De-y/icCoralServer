@@ -40,8 +40,7 @@ def get_info():
     if privkey == PRIV_KEY:
         user = User.prisma().find_first(where={'username': username})
         if user is not None and user.ic_verified == True:
-            print('I am here')
-            return True
+            return 'True'
         return "405"
     return "405"
 
